@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors:{
-        brandblue:{
+        brandred:{
           light:"#06c",
-          DEFAULT:"#06c",
+          DEFAULT:"#98202b",
           dark:"#2997ff"
         },
       }

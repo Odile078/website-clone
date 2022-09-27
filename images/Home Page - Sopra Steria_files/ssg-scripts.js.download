@@ -1,0 +1,494 @@
+// *******
+// Scripts to manage cookies
+// Tutorial cookie : https://www.w3schools.com/js/js_cookies.asp
+
+function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+// *******
+// Scripts to filter contents using dropdown lists or parameters in url
+//
+
+// Get url parameters
+function GetURLParameter(sParam) {
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) {
+	var sParameterName = sURLVariables[i].split('=');
+	if (sParameterName[0] == sParam) {
+		return sParameterName[1];
+	}
+    }
+}
+
+// Update dropdown list selection according to parameter in urlif(urlType != null) {
+function UpdateDropdownListSelection(urlName,selectDiv,setValue) {		
+
+	if(urlName != null) {
+		selectDiv.val(urlName.replace("%20"," ")).attr('selected','selected');
+	} else {
+		selectDiv.val(setValue).attr('selected','selected');
+	}
+}
+
+// Return true if the content item has in its properties the selected property in the dropdown list
+function ContentMatchProperty (selectedProperty, contentProperties, labelAll){
+	
+	var match = true;
+	
+	var arrProperties = [];
+	contentProperties.each(function(){ 
+		arrProperties.push($.trim($(this).html()).toUpperCase()) 
+	});
+
+	if($.trim(selectedProperty).toUpperCase() != $.trim(labelAll).toUpperCase() && $.inArray($.trim(selectedProperty).toUpperCase(),arrProperties)<0) {
+		match = false;
+	} 
+	
+	return match;
+}
+
+// Filtering function
+function filterByYear(){
+
+  // Selected value in dropdown lists
+  var selectedYear = $.trim($('.select-years select option:selected').html());
+  var labelAllYears = $.trim($('.select-years select option:nth-child(1)').html());
+  
+  console.log("selected year = " + selectedYear);
+  
+   // Filtering
+  $('.filter-item').each(function(){
+
+	var match = true;
+	match = ContentMatchProperty (selectedYear, $(this).find('.result-year div'), labelAllYears);
+	
+	if(match != true) {
+	  $(this).attr("hidden",true);
+	  console.log("no match");
+	} else{
+	  $(this).removeAttr("hidden");
+	  console.log("match");
+	}
+
+  })
+
+}
+
+function checkCalendarHeadersVisibility() {
+	
+  var hasUpcomingEvents = false;
+  
+  $('.bloc-upcoming .contents-list-item').each(function(){
+	if($(this).css('display') != "none") {
+		hasUpcomingEvents = true;
+	}
+  });
+ 
+  if(hasUpcomingEvents == false) {
+   $('.bloc-upcoming .bloc-title').css('display','none');
+  }
+  else {
+  $('.bloc-upcoming .bloc-title').css('display','block');
+  }
+  
+  var hasPastEvents = false;
+  $('.past-events .contents-list-item').each(function(){
+	if($(this).css('display') != "none") {
+		hasPastEvents = true;
+	}
+  });
+ 
+  if(hasPastEvents == false) {
+   $('.past-events .bloc-title').css('display','none');
+  }
+  else {
+   $('.past-events .bloc-title').css('display','block');
+  }
+	
+}
+
+// Filter contents by.. (byYear, etc. are true or false)
+function Filter(byYear, byLocation, byEventType, byExpert, byExpertise, bySector) {
+	
+  // Check if we are in a calendar page
+  var isCalendar = $(".page-innersite").find(".bloc-event-calendar").length > 0;
+  
+  // Current year
+  var currentYear = new Date().getFullYear();	// Current year
+  
+  // More recent year containing content
+  var firstYear = currentYear;
+  
+  // Update dropdown list of years according to contents : keep only years in the dropdown list that have contents associated
+  var arrUsedYears = [];
+  $('.result-year div').each(function(){
+          arrUsedYears.push($(this).html());
+  });
+  arrUsedYears = $.unique(arrUsedYears);
+  var cpt = 0;
+  var firstYearFound = false;
+  $('.select-years option').each(function(){
+          if(cpt > 0 && $.inArray($(this).text(),arrUsedYears) == -1){
+                $(this).wrap('<span/>');  //display none not recognized by IE
+          }
+		  else if(firstYearFound == false && cpt > 0){
+			firstYear = $(this).text();
+			firstYearFound = true;
+		  }
+          cpt++;
+  });
+  
+  // Get contents type of display
+  var displayType = $('.contents-list .contents-list-item').css('display'); 
+  
+  // Parameters in url
+  var urlYear = GetURLParameter('year');
+  var urlLocation = GetURLParameter('location');
+  var urlType = GetURLParameter('type');
+  var urlExpertise = GetURLParameter('expertise');
+  var urlExpert = GetURLParameter('expert');
+  var urlSector = GetURLParameter('sector');
+  
+  // Get 1st option in each filtering list 
+  var labelAllYears = $.trim($('.select-years select option:nth-child(1)').html());
+  var labelAllLocations = $.trim($('.select-locations select option:nth-child(1)').html());
+  var labelAllTypes = $.trim($('.select-types select option:nth-child(1)').html());
+  var labelAllExpertises = $.trim($('.select-expertises select option:nth-child(1)').html());
+  var labelAllExperts = $.trim($('.select-experts select option:nth-child(1)').html());
+  var labelAllSectors = $.trim($('.select-sectors select option:nth-child(1)').html());
+ 
+  // Set values in dropdown lists
+  var setYear = $.trim($('.select-years select option:selected').html());
+  var setLocation = $.trim($('.select-locations select option:selected').html());
+  var setType = $.trim($('.select-types select option:selected').html());
+  var setExpertise = $.trim($('.select-expertises select option:selected').html());
+  var setExpert = $.trim($('.select-experts select option:selected').html());
+  var setSector = $.trim($('.select-sectors select option:selected').html());
+    
+  // Get year to filter (url or current year) and update dropdown year list
+  if(byYear == true) {
+	  if(urlYear != null) {
+		var currentYear = urlYear // filter by param in url
+		$('.select-years select').val(currentYear).attr('selected','selected');
+	  } else {
+		var currentYear = new Date().getFullYear();	// Current year
+		// Filtering by url no year to select
+		if(urlLocation != null || urlType != null || urlExpertise != null || urlExpert != null || urlSector != null) {
+			$('.select-years select option:nth-child(1)').attr('selected','selected');
+		}
+		else { // Filtering without url -> check if a year has been set
+			if(setYear == labelAllYears) {
+				// no year set so we set current year
+				//$('.select-years select').val(currentYear).attr('selected','selected');
+				// no year set so we set last year containing contents
+				console.log(firstYear);
+				$('.select-years select').val(firstYear).attr('selected','selected');
+			}
+		}
+	  }
+  }
+  
+  // Update dropdown lists
+  if(byLocation == true) {  UpdateDropdownListSelection(urlLocation, $('.select-locations select'),setLocation ); }
+  if(byEventType == true) { UpdateDropdownListSelection(urlType, $('.select-types select'),setType ); }
+  if(byExpert == true) { UpdateDropdownListSelection(urlExpert, $('.select-experts select'),setExpert ); }
+  if(byExpertise == true) { UpdateDropdownListSelection(urlExpertise, $('.select-expertises select'),setExpertise ); }
+  if(bySector == true) { UpdateDropdownListSelection(urlSector, $('.select-sectors select'),setSector ); }
+  
+  // Selected value in dropdown lists
+  var selectedYear = $.trim($('.select-years select option:selected').html());
+  var selectedLocation = $.trim($('.select-locations select option:selected').html());
+  var selectedType = $.trim($('.select-types select option:selected').html());
+  var selectedExpertise = $.trim($('.select-expertises select option:selected').html());
+  var selectedExpert = $.trim($('.select-experts select option:selected').html());
+  var selectedSector = $.trim($('.select-sectors select option:selected').html());
+  
+  // Filtering when coming on the page 
+  $('.contents-list .contents-list-item').css('display','none');  
+  $('.contents-list .contents-list-item').each(function(){
+	
+	var match = true;
+	
+	if(byYear == true) { 
+		match = ContentMatchProperty (selectedYear, $(this).find('.result-year div'), labelAllYears);
+	}
+	if(match == true && byLocation == true) {
+		match = ContentMatchProperty (selectedLocation, $(this).find('.result-locations div'), labelAllLocations);
+	}
+	if(match == true && byEventType == true) {
+		match = ContentMatchProperty (selectedType, $(this).find('.result-types div'), labelAllTypes);
+	}
+	if(match == true && byExpertise == true) {
+		match = ContentMatchProperty (selectedExpertise, $(this).find('.result-expertises div'), labelAllExpertises);
+	}
+	if(match == true && byExpert == true) {
+		match = ContentMatchProperty (selectedExpert, $(this).find('.result-experts div'), labelAllExperts);
+	}
+	if(match == true && bySector == true) {
+		match = ContentMatchProperty (selectedSector, $(this).find('.result-sectors div'), labelAllSectors);
+	}
+	
+	if(match == true) {
+		$(this).css('display',displayType);
+	}
+  });
+  
+  checkCalendarHeadersVisibility();
+  
+  // Action when selecting a property in dropdown lists
+  $('select').change(function(){
+	
+	selectedYear = $.trim($('.select-years select option:selected').html());
+	selectedLocation = $.trim($('.select-locations select option:selected').html());
+	selectedType = $.trim($('.select-types select option:selected').html());
+	selectedExpertise = $.trim($('.select-expertises select option:selected').html());
+	selectedExpert = $.trim($('.select-experts select option:selected').html());
+	selectedSector = $.trim($('.select-sectors select option:selected').html());
+		
+	$('.contents-list .contents-list-item').css('display','none');
+	$('.contents-list .contents-list-item').each(function(){
+	
+		var match = true;
+		
+		if(byYear == true) { 
+			match = ContentMatchProperty (selectedYear, $(this).find('.result-year div'), labelAllYears);
+		}
+		if(match == true && byLocation == true) {
+			match = ContentMatchProperty (selectedLocation, $(this).find('.result-locations div'), labelAllLocations);
+		}
+		if(match == true && byEventType == true) {
+			match = ContentMatchProperty (selectedType, $(this).find('.result-types div'), labelAllTypes);
+		}
+		if(match == true && byExpertise == true) {
+			match = ContentMatchProperty (selectedExpertise, $(this).find('.result-expertises div'), labelAllExpertises);
+		}
+		if(match == true && byExpert == true) {
+			match = ContentMatchProperty (selectedExpert, $(this).find('.result-experts div'), labelAllExperts);
+		}
+		if(match == true && bySector == true) {
+			match = ContentMatchProperty (selectedSector, $(this).find('.result-sectors div'), labelAllSectors);
+		}
+		
+		if(match == true) {
+			$(this).css('display',displayType);
+		}
+
+	});
+	
+	// In case of calendar page we check if the upcoming and past blocs should be displayed
+	if(isCalendar) {
+		checkCalendarHeadersVisibility();		  
+	}
+	
+  });
+  
+  
+}
+
+
+function CreateTestimoniesCarousel() {
+
+    $('.guidTestimony').each(function(){
+      
+      var theId = $(this).text();
+           
+      // Add active to first slide to load carousel
+      $('#' + theId + ' .carousel-item:nth-child(1)').addClass('active');
+      
+      
+      // Add numbers navigation
+      var nbSlides = $('#' + theId + ' .carousel-item').length;
+      var linksCode = '<div class="bloc-carousel-video__links"><ol class="carousel-indicators">';
+      
+      var i;
+      for (i = 0; i < nbSlides; i++) { 
+        if(i==0) {
+          linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="0" class="active"><div class="bloc-carousel-video__count-container"><span class="bloc-carousel-video__count">';
+        }
+        else {
+          linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="' + i + '"><div class="bloc-carousel-video__count-container"><span class="bloc-carousel-video__count">';
+        }
+        linksCode = linksCode + '0' + (i+1).toString();
+        linksCode = linksCode + '</span></div></li>';
+        
+      }
+      
+      linksCode = linksCode + '</ol></div>';
+      
+      $('#'+ theId + ' nav').append(linksCode);
+        
+    });
+    
+}
+
+function CreateImplantationCarousel() {
+
+    $('.guidImplantation').each(function(){
+      
+      var theId = $(this).text();
+           
+      // Add active to first slide to load carousel
+      $('#' + theId + ' .carousel-item:nth-child(1)').addClass('active');
+      
+      
+      // Add numbers navigation
+      var nbSlides = $('#' + theId + ' .carousel-item').length;
+      var linksCode = '<div class="bloc-slider__links"><ol class="carousel-indicators">';
+      
+      var i;
+      for (i = 0; i < nbSlides; i++) { 
+        if(i==0) {
+          linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="0" class="active"><div class="bloc-slider__count-container"><span class="bloc-slider__count">';
+        }
+        else {
+          linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="' + i + '"><div class="bloc-slider__count-container"><span class="bloc-slider__count">';
+        }
+        linksCode = linksCode + '0' + (i+1).toString();
+        linksCode = linksCode + '</span></div></li>';
+        
+      }
+      
+      linksCode = linksCode + '</ol></div>';
+      
+      $('#'+ theId + ' nav').append(linksCode);
+        
+    });
+    
+}
+
+
+function ActivateCarousel(){
+	
+	$('.bloc-slider-carousel-simple .bloc-slider').each(function(){
+		
+		var theId = $(this).attr('id');
+		
+		// Add active to first slide to load carousel
+		$('#' + theId  + ' .carousel-item:nth-child(1)').addClass('active');
+	
+	});
+}
+
+function CreateCarousel(){
+
+	$('.guid').each(function(){
+		
+		var theId = $(this).text();
+		
+		// Add active to first slide to load carousel
+		$('#' + theId  + ' .carousel-item:nth-child(1)').addClass('active');
+	
+	});
+	
+}
+
+function CreateClientStoriesCarousel(){
+
+	$('.guidClientStory').each(function(){
+		
+		var theId = $(this).text();
+		
+		// Add active to first slide to load carousel
+		$('#' + theId + ' .carousel-item:nth-child(1)').addClass('active');
+		
+		// Add numbers navigation
+		var nbSlides = $('#' + theId + ' .carousel-item').length;
+		var linksCode = '<div class="bloc-carousel-article__links"><ol class="carousel-indicators">';
+		
+		var i;
+		for (i = 0; i < nbSlides; i++) { 
+		  if(i==0) {
+			linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="0" class="active"><div class="bloc-carousel-article__count-container"><span class="bloc-carousel-article__count">';
+		  }
+		  else {
+			linksCode = linksCode + '<li data-target="#' + theId + '" data-slide-to="' + i + '"><div class="bloc-carousel-article__count-container"><span class="bloc-carousel-article__count">';
+		  }
+		  linksCode = linksCode + '0' + (i+1).toString();
+		  linksCode = linksCode + '</span></div></li>';
+		  
+		}
+		
+		linksCode = linksCode + '</ol></div>';
+		
+		$('#' +  theId + ' nav').append(linksCode);
+		
+	});
+	
+}
+
+
+
+
+$(document).ready(function($) {
+	
+	
+	// Activate simple carousels
+	if($('.bloc-slider-carousel-simple').length > 0) {
+		ActivateCarousel()
+	}
+	
+	// Check if there are perspectives carousel to create on the page
+	if($('.bloc-perspectives').length > 0) {
+		CreateCarousel();
+	}
+	
+	
+	// Check if there are perspectives carousel to create on the page
+	if($('.bloc-blocpages').length > 0) {
+		CreateCarousel();
+	}
+	
+	// Check if there are perspectives carousel to create on the page
+	if($('.bloc-implantation').length > 0) {
+		CreateImplantationCarousel();
+	}
+	
+	// Check if there are testimonies carousel to create on the page
+	if($('.bloc-testimonies').length > 0) {
+		CreateTestimoniesCarousel();
+	}
+	
+	// Check if there are client stories carousel to create on the page
+	if($('.bloc-clientstories').length > 0) {
+		CreateClientStoriesCarousel();
+	}
+	
+	// List accordion action
+	$(".bloc-faq button").each(function(){
+      $(this).on("click", function(event) {
+        
+        if($(this).closest(".bloc-faq").hasClass("active")){
+          $(this).closest(".bloc-faq").removeClass("active");
+        } else{
+          $(this).parent().removeClass("active");
+          $(this).closest(".bloc-faq").addClass("active");
+        }
+        
+        event.preventDefault();
+        
+      });
+    });
+	
+});
+

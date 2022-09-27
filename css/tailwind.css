@@ -5,4 +5,19 @@
     .text-f{
         @apply text-red-500
     }
+    .button{
+        @apply text-base py-2.5 px-5 border font-bold
+    }
+    .button__red{
+        @apply  bg-brandred text-white text-sm border-brandred
+    }
+    .button__red--hover{
+        @apply  hover:bg-white hover:border  hover:text-gray-900
+    }
+    .button__white{
+        @apply text-gray-900 border-gray-900 bg-white
+    }
+    .button__white--hover{
+        @apply hover:bg-gray-900 hover:border  hover:text-white
+    }
 }

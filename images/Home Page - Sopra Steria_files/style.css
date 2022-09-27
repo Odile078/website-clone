@@ -1,0 +1,126 @@
+	
+ 
+/******************************************************
+	MODE EDITION
+	En mode édition pour plus de clarté 
+	*/
+
+
+
+body.sfPageEditor header {
+   background: #a90616;
+}
+
+body.sfPageEditor nav{
+	background:#F20920;
+	float:none;
+}
+body.sfPageEditor main {
+	background:#045379;
+}
+
+body.sfPageEditor #main-menu,
+body.sfPageEditor .consent-modal {
+	max-height: 100px;
+    overflow: auto;
+}
+
+body.sfPageEditor #main-menu .mega-menu__cat-article{
+	display:none;
+}
+
+body.sfPageEditor aside {
+	background:#0784c1;
+}
+body.sfPageEditor footer {
+	background:#F2A209;
+}
+
+body.sfPageEditor .grid-x1,
+body.sfPageEditor .grid-x2,
+body.sfPageEditor .grid-x3,
+body.sfPageEditor .grid-x4,
+body.sfPageEditor .grid-x6 {
+    margin-left: 0;
+    margin-right: 12rem;
+    margin-bottom: 4rem;
+	background: aliceblue;
+    padding: 2rem;
+}
+body.sfPageEditor .custom-container {
+	background: aquamarine;
+    padding: 2rem;
+    margin: 2rem;
+}
+
+/******************************************************
+	INIT
+	Default settings
+*/	
+
+
+
+.page-hero+.custom-container{
+	padding-top:0 !important;
+}
+
+body {
+	margin:0;
+}
+
+main,
+section {
+	padding:0;
+}	
+
+ section .row{
+	padding:2rem;
+}
+
+.orange {
+    color: #ef7d00;
+}
+
+.red{
+    color: #cf022b;
+}
+
+.select-wrapper._hide,
+._hide {
+	display:none;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Force the header not to be fixed */
+.sticky{
+	position:unset!important;
+	}
+	
+/*Style for widget js blog DE */
+ul.results__articles {
+    padding: 0;
+}
+
+/*Force black on button for iphone*/
+.bloc-faq-wrap .bloc-faq .accordion-header button {
+	color:black;
+}
